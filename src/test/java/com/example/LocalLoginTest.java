@@ -4,11 +4,12 @@ import java.io.File;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.openqa.selenium.chrome.ChromeOptions;
+
 public class LocalLoginTest {
     WebDriver driver;
 
@@ -20,6 +21,12 @@ public class LocalLoginTest {
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--window-size=1920,1080");
 
+        // Automatically uses Chromium when running inside Docker, or Google Chrome on GitHub Actions
+        String chromeBin = System.getenv("CHROME_BIN");
+        if (chromeBin != null && !chromeBin.isEmpty()) {
+            options.setBinary(chromeBin);
+        }
+
         driver = new ChromeDriver(options);
 
         String page = new File("webpage/login.html")
@@ -29,7 +36,6 @@ public class LocalLoginTest {
 
         driver.get(page);
     }
-
 
     @Test
     public void validLoginTest() {
@@ -65,7 +71,8 @@ public class LocalLoginTest {
 
     @AfterMethod
     public void tearDown() {
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
-
